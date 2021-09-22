@@ -8,11 +8,13 @@
 
 #import "WFCUPortraitCollectionViewCell.h"
 #import <SDWebImage/SDWebImage.h>
+#import "ConferenceLabelView.h"
 
 @interface WFCUPortraitCollectionViewCell ()
 @property (nonatomic, strong)UIImageView *portraitView;
 @property (nonatomic, strong)UILabel *nameLabel;
 @property (nonatomic, strong)UIImageView *stateLabel;
+@property (nonatomic, strong)ConferenceLabelView *conferenceLabelView;
 @end
 
 @implementation WFCUPortraitCollectionViewCell
@@ -23,6 +25,7 @@
     self.layer.borderColor = [UIColor clearColor].CGColor;
     [self.portraitView sd_setImageWithURL:[NSURL URLWithString:[userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
     self.nameLabel.text = userInfo.displayName;
+    self.conferenceLabelView.name = userInfo.displayName;
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onVolumeUpdated:) name:@"wfavVolumeUpdated" object:nil];
@@ -37,6 +40,7 @@
         } else {
             self.layer.borderColor = [UIColor clearColor].CGColor;
         }
+        self.conferenceLabelView.volume = volume;
     }
 }
 
@@ -49,6 +53,19 @@
         [self.stateLabel startAnimating];
         self.stateLabel.hidden = NO;
     }
+    BOOL isVideoMuted = YES;
+    BOOL isAudioMuted = YES;
+    if(!profile.audience) {
+        isVideoMuted = profile.videoMuted;
+        isAudioMuted = profile.audioMuted;
+    }
+    self.conferenceLabelView.isMuteVideo = isVideoMuted;
+    self.conferenceLabelView.isMuteAudio = isAudioMuted;
+}
+
+- (void)addSubview:(UIView *)view {
+    [super addSubview:view];
+    [self bringSubviewToFront:self.conferenceLabelView];
 }
 
 - (UIImageView *)portraitView {
@@ -83,6 +100,15 @@
         [self addSubview:_stateLabel];
     }
     return _stateLabel;
+}
+
+- (ConferenceLabelView *)conferenceLabelView {
+    if(!_conferenceLabelView) {
+        CGSize size = [ConferenceLabelView sizeOffView];
+        _conferenceLabelView = [[ConferenceLabelView alloc] initWithFrame:CGRectMake(4, self.bounds.size.height - size.height - 4, size.width, size.height)];
+        [self addSubview:_conferenceLabelView];
+    }
+    return _conferenceLabelView;
 }
 
 - (void)dealloc {

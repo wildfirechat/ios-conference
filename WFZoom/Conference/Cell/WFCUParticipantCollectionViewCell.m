@@ -9,11 +9,13 @@
 #import "WFCUParticipantCollectionViewCell.h"
 #import <SDWebImage/SDWebImage.h>
 #import "WFCUWaitingAnimationView.h"
+#import "ConferenceLabelView.h"
 
 @interface WFCUParticipantCollectionViewCell ()
 @property (nonatomic, strong)UIImageView *portraitView;
 @property (nonatomic, strong)WFCUWaitingAnimationView *stateLabel;
 @property(nonatomic, strong)NSString *userId;
+@property (nonatomic, strong)ConferenceLabelView *conferenceLabelView;
 @end
 
 @implementation WFCUParticipantCollectionViewCell
@@ -39,9 +41,25 @@
         }
     }
 
+    self.conferenceLabelView.name = userInfo.displayName;
+    
+    BOOL isVideoMuted = YES;
+    BOOL isAudioMuted = YES;
+    if(!profile.audience) {
+        isVideoMuted = profile.videoMuted;
+        isAudioMuted = profile.audioMuted;
+    }
+    self.conferenceLabelView.isMuteVideo = isVideoMuted;
+    self.conferenceLabelView.isMuteAudio = isAudioMuted;
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onVolumeUpdated:) name:@"wfavVolumeUpdated" object:nil];
     
+}
+
+- (void)addSubview:(UIView *)view {
+    [super addSubview:view];
+    [self bringSubviewToFront:self.conferenceLabelView];
 }
 
 - (void)onVolumeUpdated:(NSNotification *)notification {
@@ -52,9 +70,18 @@
         } else {
             self.layer.borderColor = [UIColor clearColor].CGColor;
         }
+        self.conferenceLabelView.volume = volume;
     }
 }
 
+- (ConferenceLabelView *)conferenceLabelView {
+    if(!_conferenceLabelView) {
+        CGSize size = [ConferenceLabelView sizeOffView];
+        _conferenceLabelView = [[ConferenceLabelView alloc] initWithFrame:CGRectMake(4, self.bounds.size.height - size.height - 4, size.width, size.height)];
+        [self addSubview:_conferenceLabelView];
+    }
+    return _conferenceLabelView;
+}
 
 - (UIImageView *)portraitView {
     if (!_portraitView) {

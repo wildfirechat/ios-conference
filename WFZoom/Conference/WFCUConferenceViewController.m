@@ -25,6 +25,7 @@
 #import "WFZConferenceInfo.h"
 #import "UIView+Toast.h"
 #import "AppService.h"
+#import "ConferenceLabelView.h"
 
 #define BOTTOM_BAR_HEIGHT  54
 @interface WFCUConferenceViewController () <UITextFieldDelegate
@@ -34,6 +35,8 @@
     ,WFCUConferenceManagerDelegate>
 
 @property (nonatomic, strong) UIView *bigVideoView;
+@property (nonatomic, strong) ConferenceLabelView *conferenceLabelView;
+
 @property (nonatomic, strong) UIImageView *bigVideoPortraitView;
 @property (nonatomic, strong) UICollectionView *smallCollectionView;
 
@@ -182,8 +185,11 @@
     [self.bigVideoView addSubview:self.bigVideoPortraitView];
     self.bigVideoView.layer.borderWidth =1.f;
     self.bigVideoView.layer.borderColor = [UIColor clearColor].CGColor;
-    
+    CGSize labelSize = [ConferenceLabelView sizeOffView];
+    self.conferenceLabelView = [[ConferenceLabelView alloc] initWithFrame:CGRectMake(4, self.view.bounds.size.height - labelSize.height - kTabbarSafeBottomMargin - BOTTOM_BAR_HEIGHT - 4, labelSize.width, labelSize.height)];
+    [self.bigVideoView addSubview:self.conferenceLabelView];
     [self.view addSubview:self.bigVideoView];
+    
     
     layout.itemSize = CGSizeMake(itemWidth, itemWidth);
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
@@ -496,6 +502,7 @@
 
 - (void)informationButtonDidTap:(UIButton *)button {
     [self showConferenceInfoView];
+    [self startHidePanelTimer];
 }
 
 - (void)switchCameraButtonDidTap:(UIButton *)button {
@@ -514,6 +521,8 @@
         [[WFCUConferenceManager sharedInstance] muteAudio:!self.currentSession.audioMuted];
         self.bigVideoView.layer.borderColor = [UIColor clearColor].CGColor;
         [self updateAudioButton];
+        [self startHidePanelTimer];
+        [self updateMainNameLabel];
     }
 }
 
@@ -528,6 +537,7 @@
     if (self.currentSession.state != kWFAVEngineStateIdle) {
         [self.currentSession enableSpeaker:!self.currentSession.isSpeaker];
         [self updateSpeakerButton];
+        [self startHidePanelTimer];
     }
 }
 
@@ -696,6 +706,7 @@
         //请参考函数 audioButtonDidTap
         [[WFCUConferenceManager sharedInstance] muteVideo:!self.currentSession.isVideoMuted];
         [self updateVideoButton];
+        [self startHidePanelTimer];
     }
 }
 
@@ -871,6 +882,10 @@
     self.bottomBarView.hidden = NO;
     [UIView animateWithDuration:0.5 animations:^{
         self.bottomBarView.frame = CGRectMake(0, self.view.bounds.size.height - kTabbarSafeBottomMargin-BOTTOM_BAR_HEIGHT, self.view.bounds.size.width, BOTTOM_BAR_HEIGHT+kTabbarSafeBottomMargin);
+        CGSize labelSize = [ConferenceLabelView sizeOffView];
+        CGRect labelFrame = self.conferenceLabelView.frame;
+        labelFrame.origin.y = self.view.bounds.size.height - labelSize.height - kTabbarSafeBottomMargin - BOTTOM_BAR_HEIGHT - 4;
+        self.conferenceLabelView.frame = labelFrame;
     }];
     
     if (self.currentSession.audioOnly) {
@@ -889,6 +904,10 @@
 - (void)hidePanel {
     [UIView animateWithDuration:0.5 animations:^{
         self.bottomBarView.frame = CGRectMake(0, self.view.bounds.size.height, self.view.bounds.size.width, 0);
+        CGSize labelSize = [ConferenceLabelView sizeOffView];
+        CGRect labelFrame = self.conferenceLabelView.frame;
+        labelFrame.origin.y = self.view.bounds.size.height - labelSize.height - kTabbarSafeBottomMargin - 4;
+        self.conferenceLabelView.frame = labelFrame;
     } completion:^(BOOL finished) {
         self.bottomBarView.hidden = YES;
     }];
@@ -1068,6 +1087,7 @@
 }
 
 - (void)didCreateLocalVideoTrack:(RTCVideoTrack *)localVideoTrack {
+    [self.bigVideoView bringSubviewToFront:self.conferenceLabelView];
 }
 
 - (void)didReceiveRemoteVideoTrack:(RTCVideoTrack *)remoteVideoTrack fromUser:(NSString *)userId {
@@ -1101,12 +1121,18 @@
 }
 - (void)didReportAudioVolume:(NSInteger)volume ofUser:(NSString *)userId {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"wfavVolumeUpdated" object:userId userInfo:@{@"volume":@(volume)}];
+    NSLog(@"volume is %ld", volume);
     if (!self.currentSession.audioOnly && [userId isEqualToString:self.participants.firstObject]) {
+        if(self.currentSession.audience) {
+            volume = 0;
+        }
+        
         if (volume > 1000) {
             self.bigVideoView.layer.borderColor = [UIColor greenColor].CGColor;
         } else {
             self.bigVideoView.layer.borderColor = [UIColor clearColor].CGColor;
         }
+        self.conferenceLabelView.volume = volume;
     }
 }
 - (void)didCallEndWithReason:(WFAVCallEndReason)reason {
@@ -1356,6 +1382,34 @@
     } else {
         [self.portraitCollectionView reloadData];
     }
+    [self updateMainNameLabel];
+}
+
+- (void)updateMainNameLabel {
+    NSString *userId = [self.participants firstObject];
+    BOOL isMuteVideo = true;
+    BOOL isMuteAudio = true;
+    if ([userId isEqualToString:[WFCCNetworkService sharedInstance].userId]) {
+        if(!self.currentSession.isAudience) {
+            isMuteVideo = self.currentSession.isVideoMuted;
+            isMuteAudio = self.currentSession.isAudioMuted;
+        }
+    } else {
+        for (WFAVParticipantProfile *profile in self.currentSession.participants) {
+            if ([profile.userId isEqualToString:userId]) {
+                if(![profile audience]) {
+                    isMuteVideo = profile.videoMuted;
+                    isMuteAudio = profile.audioMuted;
+                }
+                break;
+            }
+        }
+    }
+    self.conferenceLabelView.isMuteVideo = isMuteVideo;
+    self.conferenceLabelView.isMuteAudio = isMuteAudio;
+    WFCCUserInfo *userInfo = [[WFCCIMService sharedWFCIMService] getUserInfo:userId refresh:NO];
+    self.conferenceLabelView.name = userInfo.displayName;
+    [self.bigVideoView bringSubviewToFront:self.conferenceLabelView];
 }
 
 - (BOOL)switchVideoView:(NSUInteger)index {

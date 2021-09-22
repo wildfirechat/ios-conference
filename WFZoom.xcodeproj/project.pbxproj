@@ -67,6 +67,7 @@
 		2F21584226E1BF99004AAB3F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2F21584126E1BF99004AAB3F /* Main.storyboard */; };
 		2F2158FF26E1C8F4004AAB3F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F2158FE26E1C8F4004AAB3F /* AppDelegate.m */; };
 		2F21590226E1CDB3004AAB3F /* WFZStartConferenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F21590126E1CDB3004AAB3F /* WFZStartConferenceViewController.m */; };
+		2F236E8326FB131B001D2DF0 /* ConferenceLabelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F236E8226FB131B001D2DF0 /* ConferenceLabelView.m */; };
 		2F278DFA26E3AD4800E3F781 /* WFCSettingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F278DF926E3AD4800E3F781 /* WFCSettingTableViewController.m */; };
 		2F278DFD26E3AD8F00E3F781 /* WFCSecurityTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F278DFC26E3AD8E00E3F781 /* WFCSecurityTableViewController.m */; };
 		2F278E0026E3ADA600E3F781 /* WFCAboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F278DFF26E3ADA600E3F781 /* WFCAboutViewController.m */; };
@@ -246,6 +247,8 @@
 		2F2158FE26E1C8F4004AAB3F /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		2F21590026E1CDB3004AAB3F /* WFZStartConferenceViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WFZStartConferenceViewController.h; sourceTree = "<group>"; };
 		2F21590126E1CDB3004AAB3F /* WFZStartConferenceViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WFZStartConferenceViewController.m; sourceTree = "<group>"; };
+		2F236E8126FB131B001D2DF0 /* ConferenceLabelView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConferenceLabelView.h; sourceTree = "<group>"; };
+		2F236E8226FB131B001D2DF0 /* ConferenceLabelView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConferenceLabelView.m; sourceTree = "<group>"; };
 		2F278DF826E3AD4800E3F781 /* WFCSettingTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WFCSettingTableViewController.h; sourceTree = "<group>"; };
 		2F278DF926E3AD4800E3F781 /* WFCSettingTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WFCSettingTableViewController.m; sourceTree = "<group>"; };
 		2F278DFB26E3AD8E00E3F781 /* WFCSecurityTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WFCSecurityTableViewController.h; sourceTree = "<group>"; };
@@ -718,6 +721,15 @@
 			path = Setting;
 			sourceTree = "<group>";
 		};
+		2F236E8026FB12F8001D2DF0 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				2F236E8126FB131B001D2DF0 /* ConferenceLabelView.h */,
+				2F236E8226FB131B001D2DF0 /* ConferenceLabelView.m */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
 		2F7B3F3426E1F944007BA7B8 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
@@ -746,6 +758,7 @@
 		2F7B3F3826E1FE71007BA7B8 /* Conference */ = {
 			isa = PBXGroup;
 			children = (
+				2F236E8026FB12F8001D2DF0 /* View */,
 				2F7B3F3D26E1FE71007BA7B8 /* Message */,
 				2F7B3F4126E1FE71007BA7B8 /* Cell */,
 				2F7B3F4626E1FE71007BA7B8 /* Model */,
@@ -1074,6 +1087,7 @@
 				2F7B3FC626E209FA007BA7B8 /* DNTapDetectingImageView.m in Sources */,
 				2F7B3F3726E1F94D007BA7B8 /* WFCUGeneralSwitchTableViewCell.m in Sources */,
 				2F7B3FB826E209FA007BA7B8 /* DNAsset.m in Sources */,
+				2F236E8326FB131B001D2DF0 /* ConferenceLabelView.m in Sources */,
 				2F2157D826E1B882004AAB3F /* LBXAlertAction.m in Sources */,
 				2F7B3FC126E209FA007BA7B8 /* DNAssetsViewCell.m in Sources */,
 				2F7B3F4D26E1FE71007BA7B8 /* WFCUConferenceInviteViewController.m in Sources */,

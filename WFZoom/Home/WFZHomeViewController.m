@@ -48,6 +48,11 @@
         }
     }];
     
+    [[NSNotificationCenter defaultCenter] addObserverForName:kCONFERENCE_DESTROYED object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull notification) {
+        [ws reloadData];
+    }];
+    
+    
     [self initTopPannel];
     [self initTableView];
     NSArray *arrays = [[NSUserDefaults standardUserDefaults] objectForKey:@"SAVED_CONFERENCE_LIST"];

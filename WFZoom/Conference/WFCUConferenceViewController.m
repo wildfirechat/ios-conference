@@ -465,7 +465,7 @@
 
 - (void)destroyConference {
     [[AppService sharedAppService] destroyConference:self.currentSession.callId success:^{
-        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kCONFERENCE_DESTROYED object:nil];
     } error:^(int errorCode, NSString * _Nonnull message) {
         
     }];

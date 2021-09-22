@@ -1320,8 +1320,6 @@
     self.bigVideoView.layer.borderColor = [UIColor clearColor].CGColor;
     if (!self.currentSession.audioOnly) {
         if (self.currentSession.state == kWFAVEngineStateConnecting || self.currentSession.state == kWFAVEngineStateConnected) {
-            
-            _speakingView.hidden = YES;
             NSString *userId = [self.participants firstObject];
             if ([userId isEqualToString:[WFCCNetworkService sharedInstance].userId]) {
                 if (self.currentSession.myProfile.videoMuted) {

@@ -65,9 +65,6 @@
 
 @property (nonatomic, strong) NSMutableArray<NSString *> *participants;
 
-//视频时，大屏用户正在说话
-@property (nonatomic, strong)UIImageView *speakingView;
-
 @property (nonatomic, strong)NSString *focusUser;
 
 @property(nonatomic, strong)UIView *bottomBarView;
@@ -183,6 +180,9 @@
     self.bigVideoPortraitView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, itemWidth, itemWidth)];
     self.bigVideoPortraitView.center = self.bigVideoView.center;
     [self.bigVideoView addSubview:self.bigVideoPortraitView];
+    self.bigVideoView.layer.borderWidth =1.f;
+    self.bigVideoView.layer.borderColor = [UIColor clearColor].CGColor;
+    
     [self.view addSubview:self.bigVideoView];
     
     layout.itemSize = CGSizeMake(itemWidth, itemWidth);
@@ -319,19 +319,6 @@
         [self.view addSubview:_scalingButton];
     }
     return _scalingButton;
-}
-
-- (UIImageView *)speakingView {
-    if (!_speakingView) {
-        _speakingView = [[UIImageView alloc] initWithFrame:CGRectMake(0, self.bigVideoView.bounds.size.height - 20, 20, 20)];
-
-        _speakingView.layer.masksToBounds = YES;
-        _speakingView.layer.cornerRadius = 2.f;
-        _speakingView.image = [UIImage imageNamed:@"speaking"];
-        _speakingView.hidden = YES;
-        [self.bigVideoView addSubview:_speakingView];
-    }
-    return _speakingView;
 }
 
 - (UIButton *)createBarButtom:(NSString *)title imageName:(NSString *)imageName selectedImageName:(NSString *)selectedImageName select:(SEL)selector frame:(CGRect)frame {
@@ -525,6 +512,7 @@
         // 原因时在主播状态下切换mute状态会引发一次信令交互，按照此做法则能避免此交互。
         // video操作时也需要遵循此原则，请参考函数 videoButtonDidTap
         [[WFCUConferenceManager sharedInstance] muteAudio:!self.currentSession.audioMuted];
+        self.bigVideoView.layer.borderColor = [UIColor clearColor].CGColor;
         [self updateAudioButton];
     }
 }
@@ -1115,10 +1103,9 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"wfavVolumeUpdated" object:userId userInfo:@{@"volume":@(volume)}];
     if (!self.currentSession.audioOnly && [userId isEqualToString:self.participants.firstObject]) {
         if (volume > 1000) {
-            [self.bigVideoView bringSubviewToFront:self.speakingView];
-            self.speakingView.hidden = NO;
+            self.bigVideoView.layer.borderColor = [UIColor greenColor].CGColor;
         } else {
-            self.speakingView.hidden = YES;
+            self.bigVideoView.layer.borderColor = [UIColor clearColor].CGColor;
         }
     }
 }
@@ -1330,6 +1317,7 @@
     }
 }
 - (void)reloadVideoUI {
+    self.bigVideoView.layer.borderColor = [UIColor clearColor].CGColor;
     if (!self.currentSession.audioOnly) {
         if (self.currentSession.state == kWFAVEngineStateConnecting || self.currentSession.state == kWFAVEngineStateConnected) {
             

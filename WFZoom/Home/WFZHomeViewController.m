@@ -219,6 +219,7 @@
 
     [alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
         textField.placeholder = @"请输入会议号";
+        textField.keyboardType = UIKeyboardTypeNumberPad;
     }];
     
     [alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {

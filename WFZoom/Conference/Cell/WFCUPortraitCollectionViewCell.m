@@ -13,19 +13,17 @@
 @property (nonatomic, strong)UIImageView *portraitView;
 @property (nonatomic, strong)UILabel *nameLabel;
 @property (nonatomic, strong)UIImageView *stateLabel;
-
-@property (nonatomic, strong)UIImageView *speakingView;
-
 @end
 
 @implementation WFCUPortraitCollectionViewCell
 
 - (void)setUserInfo:(WFCCUserInfo *)userInfo {
     _userInfo = userInfo;
+    self.layer.borderWidth = 1.f;
+    self.layer.borderColor = [UIColor clearColor].CGColor;
     [self.portraitView sd_setImageWithURL:[NSURL URLWithString:[userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
     self.nameLabel.text = userInfo.displayName;
     
-    _speakingView.hidden = YES;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onVolumeUpdated:) name:@"wfavVolumeUpdated" object:nil];
     
@@ -35,10 +33,9 @@
     if([notification.object isEqual:self.userInfo.userId]) {
         NSInteger volume = [notification.userInfo[@"volume"] integerValue];
         if (volume > 1000) {
-            self.speakingView.hidden = NO;
-            [self bringSubviewToFront:self.speakingView];
+            self.layer.borderColor = [UIColor greenColor].CGColor;
         } else {
-            self.speakingView.hidden = YES;
+            self.layer.borderColor = [UIColor clearColor].CGColor;
         }
     }
 }
@@ -63,18 +60,6 @@
         [self addSubview:_portraitView];
     }
     return _portraitView;
-}
-
-- (UIImageView *)speakingView {
-    if (!_speakingView) {
-        _speakingView = [[UIImageView alloc] initWithFrame:CGRectMake(0, self.itemSize - 20, 20, 20)];
-
-        _speakingView.layer.masksToBounds = YES;
-        _speakingView.layer.cornerRadius = 2.f;
-        _speakingView.image = [UIImage imageNamed:@"speaking"];
-        [self addSubview:_speakingView];
-    }
-    return _speakingView;
 }
 
 - (UILabel *)nameLabel {

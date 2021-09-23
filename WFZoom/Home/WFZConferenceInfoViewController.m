@@ -80,6 +80,11 @@
 
 - (void)setConferenceInfo:(WFZConferenceInfo *)conferenceInfo {
     _conferenceInfo = conferenceInfo;
+    if(conferenceInfo.audience && ![conferenceInfo.owner isEqualToString:[WFCCNetworkService sharedInstance].userId]) {
+        self.enableVideo = NO;
+        self.enableAudio = NO;
+    }
+    
     [self.tableView reloadData];
     if([conferenceInfo.owner isEqualToString:[WFCCNetworkService sharedInstance].userId]) {
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"销毁" style:UIBarButtonItemStyleDone target:self action:@selector(onDestroyBtn:)];
@@ -116,9 +121,16 @@
     btn.enabled = NO;
     
     
-    if(!self.enableAudio && !self.enableVideo) {
+    if(self.conferenceInfo.audience) {
+        if(self.conferenceInfo.allowSwitchMode || [self.conferenceInfo.owner isEqualToString:[WFCCNetworkService sharedInstance].userId]) {
+            if(self.enableAudio || self.enableVideo) {
+                self.conferenceInfo.audience = NO;
+            }
+        }
+    } else if(!self.enableAudio && !self.enableVideo) {
         self.conferenceInfo.audience = YES;
     }
+    
     WFCUConferenceViewController *vc = [[WFCUConferenceViewController alloc] initWithConferenceInfo:self.conferenceInfo muteAudio:!self.enableAudio muteVideo:!self.enableVideo];
     [[WFAVEngineKit sharedEngineKit] presentViewController:vc];
     
@@ -226,7 +238,7 @@
             self.joinBtn.enabled = NO;
             [self.joinBtn setTitle:@"会议已结束" forState:UIControlStateNormal];
             [self stopCheckTimer];
-        } else if(self.conferenceInfo.startTime == 0 || self.conferenceInfo.startTime <= now) {
+        } else if(self.conferenceInfo.startTime == 0 || self.conferenceInfo.startTime <= now || !self.conferenceInfo.noJoinBeforeStart) {
             [self.joinBtn setTitle:@"加入会议" forState:UIControlStateNormal];
         } else if(self.conferenceInfo.startTime > 0 && self.conferenceInfo.startTime - 180 <= now) {
             [self.joinBtn setTitle:[NSString stringWithFormat:@"加入会议(%lld秒后正式开始)", now - self.conferenceInfo.startTime] forState:UIControlStateNormal];
@@ -322,6 +334,12 @@
                 ws.enableVideo = value;
                 handleBlock(YES);
             };
+        }
+        
+        if(self.conferenceInfo.allowSwitchMode || [self.conferenceInfo.owner isEqualToString:[WFCCNetworkService sharedInstance].userId]) {
+            switchCell.valueSwitch.enabled = YES;
+        } else {
+            switchCell.valueSwitch.enabled = NO;
         }
         return switchCell;
     } else {

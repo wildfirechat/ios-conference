@@ -15,7 +15,7 @@
 #import "WFCUConferenceInviteViewController.h"
 #import "WFCUPinyinUtility.h"
 #import "WFCUProfileTableViewController.h"
-
+#import "WFZConferenceInfo.h"
 
 @interface WFCUConferenceMemberManagerViewController () <UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
 @property (nonatomic, strong)UITableView *tableView;
@@ -67,7 +67,7 @@
     for (WFAVParticipantProfile *p in ps) {
         WFCUConferenceMember *member = [[WFCUConferenceMember alloc] init];
         member.userId = p.userId;
-        member.isHost = [p.userId isEqualToString:[WFAVEngineKit sharedEngineKit].currentSession.host];
+        member.isHost = [p.userId isEqualToString:self.conferenceInfo.owner];
         member.isVideoEnabled = !p.videoMuted;
         member.isAudioEnabled = !p.audioMuted;
         member.isMe = NO;
@@ -92,7 +92,7 @@
     
     WFCUConferenceMember *member = [[WFCUConferenceMember alloc] init];
     member.userId = [WFCCNetworkService sharedInstance].userId;
-    member.isHost = [member.userId isEqualToString:callSession.host];
+    member.isHost = [member.userId isEqualToString:self.conferenceInfo.owner];
     member.isVideoEnabled = !callSession.isVideoMuted;
     member.isAudioEnabled = !callSession.isAudioMuted;
     member.isMe = YES;
@@ -242,7 +242,7 @@
     [alertController addAction:actionCancel];
     [alertController addAction:showProfile];
     
-    if([[WFAVEngineKit sharedEngineKit].currentSession.host isEqualToString:[WFCCNetworkService sharedInstance].userId] && !member.isMe) {
+    if([self.conferenceInfo.owner isEqualToString:[WFCCNetworkService sharedInstance].userId] && !member.isMe) {
         if(!member.isAudience) {
             [alertController addAction:requestUnpublish];
         } else {
@@ -251,9 +251,13 @@
         [alertController addAction:requestQuit];
     } else if(member.isMe) {
         if(member.isAudience) {
-            [alertController addAction:enableAudio];
-            [alertController addAction:enableVideo];
-            [alertController addAction:enableAudioVideo];
+            if(member.isHost || self.conferenceInfo.allowSwitchMode) {
+                [alertController addAction:enableAudio];
+                [alertController addAction:enableVideo];
+                [alertController addAction:enableAudioVideo];
+            } else {
+                //Todo 举手请求发言
+            }
         } else {
             if(member.isAudioEnabled) {
                 [alertController addAction:muteAudio];

@@ -36,6 +36,9 @@
 
 - (void)setVolume:(NSInteger)volume {
     _volume = volume;
+    if(self.isMuteAudio)
+        return;
+    
     int v = (int)(volume/1000);
     if(v < 0) {
         v = 0;

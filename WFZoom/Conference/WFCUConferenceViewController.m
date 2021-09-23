@@ -185,11 +185,12 @@
     [self.bigVideoView addSubview:self.bigVideoPortraitView];
     self.bigVideoView.layer.borderWidth =1.f;
     self.bigVideoView.layer.borderColor = [UIColor clearColor].CGColor;
-    CGSize labelSize = [ConferenceLabelView sizeOffView];
-    self.conferenceLabelView = [[ConferenceLabelView alloc] initWithFrame:CGRectMake(4, self.view.bounds.size.height - labelSize.height - kTabbarSafeBottomMargin - BOTTOM_BAR_HEIGHT - 4, labelSize.width, labelSize.height)];
-    [self.bigVideoView addSubview:self.conferenceLabelView];
     [self.view addSubview:self.bigVideoView];
     
+    CGSize labelSize = [ConferenceLabelView sizeOffView];
+    self.conferenceLabelView = [[ConferenceLabelView alloc] initWithFrame:CGRectMake(4, self.view.bounds.size.height - labelSize.height - kTabbarSafeBottomMargin - BOTTOM_BAR_HEIGHT - 4, labelSize.width, labelSize.height)];
+    
+    [self.view addSubview:self.conferenceLabelView];
     
     layout.itemSize = CGSizeMake(itemWidth, itemWidth);
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
@@ -657,6 +658,7 @@
         [self updateAudioButton];
         [self updateVideoButton];
     }
+    [self.view bringSubviewToFront:self.conferenceLabelView];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
